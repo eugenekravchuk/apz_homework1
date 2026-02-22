@@ -34,15 +34,17 @@ class MessageIn(BaseModel):
 
 
 async def send_with_retry(
-    fn: Callable[[], Awaitable[Any]], retries: int = 3, delay_ms: int = 300
+    fn: Callable[[], Awaitable[Any]], retries: int = 3, delay_ms: int = 10000, attempt: int = 1
 ) -> Any:
     try:
         return await fn()
     except (grpc.aio.AioRpcError, httpx.HTTPError) as exc:
         if retries <= 0:
+            print(f"Retry attempt {attempt} failed, no retries left: {exc}")
             raise exc
+        print(f"Retry attempt {attempt} failed: {exc}. Retries left: {retries}; waiting {delay_ms} ms")
         await asyncio.sleep(delay_ms / 1000)
-        return await send_with_retry(fn, retries - 1, delay_ms * 2)
+        return await send_with_retry(fn, retries - 1, delay_ms * 2, attempt + 1)
 
 
 @app.on_event("startup")
