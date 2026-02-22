@@ -54,4 +54,3 @@ curl http://localhost:3000/api/messages
 
 ## Notes
 - In-memory storage: restart logging-service clears stored messages.
-- gRPC variant is not implemented here; HTTP/REST is used for clarity.
